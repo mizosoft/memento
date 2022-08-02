@@ -20,21 +20,22 @@
  * SOFTWARE.
  */
 
-package com.github.mizonas.memento;
+package com.github.mizosoft.memento.function;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.Reader;
-import java.nio.channels.Channels;
-import java.nio.channels.ReadableByteChannel;
-import java.nio.charset.Charset;
+import java.util.concurrent.CompletionException;
+import java.util.function.Consumer;
 
-public interface ByteReader extends ReadableByteChannel, Seekable {
-  default InputStream toInputStream() {
-    return Channels.newInputStream(this);
-  }
+public interface ThrowingConsumer<T> {
+  void accept(T val);
 
-  default Reader toCharReader(Charset charset) {
-    return Channels.newReader(this, charset);
+  default Consumer<T> toUnchecked() {
+    return val -> {
+      try {
+        accept(val);
+      } catch (Exception e) {
+        Unchecked.propagateIfUnchecked(e);
+        throw new CompletionException(e);
+      }
+    };
   }
 }

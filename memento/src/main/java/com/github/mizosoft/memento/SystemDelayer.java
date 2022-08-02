@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 
-package com.github.mizonas.memento;
+package com.github.mizosoft.memento;
 
 import java.time.Duration;
 import java.util.concurrent.CompletableFuture;

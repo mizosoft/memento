@@ -20,14 +20,13 @@
  * SOFTWARE.
  */
 
-package com.github.mizonas.memento.internal;
+package com.github.mizosoft.memento.internal;
 
 import java.io.Closeable;
 import java.io.IOException;
 import java.lang.System.Logger.Level;
 import java.lang.reflect.Constructor;
 import java.nio.ByteBuffer;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -48,6 +47,15 @@ public class IOUtils {
 
   public static ByteBuffer copyIfWritable(ByteBuffer buffer) {
     return buffer.isReadOnly() ? buffer : copy(buffer).asReadOnlyBuffer();
+  }
+
+  public static int copyRemaining(ByteBuffer src, ByteBuffer dst) {
+    int toCopy = Math.min(src.remaining(), dst.remaining());
+    int srcLimit = src.limit();
+    src.limit(src.position() + toCopy);
+    dst.put(src);
+    src.limit(srcLimit);
+    return toCopy;
   }
 
   /**

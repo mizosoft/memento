@@ -20,12 +20,39 @@
  * SOFTWARE.
  */
 
-package com.github.mizonas.memento.internal;
+package com.github.mizosoft.memento.internal.hash;
 
-public class CompareUtils {
-  private CompareUtils() {}
+import java.nio.ByteBuffer;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-  public static <T extends Comparable<? super T>> T max(T x, T y) {
-    return x.compareTo(y) >= 0 ? x : y;
+public class Hex {
+  private Hex() {}
+
+  public static String toHexString(ByteBuffer buffer) {
+    var sb = new StringBuilder();
+    while (buffer.hasRemaining()) {
+      byte b = buffer.get();
+      char upperHex = Character.forDigit((b >> 4) & 0xf, 16);
+      char lowerHex = Character.forDigit(b & 0xf, 16);
+      sb.append(upperHex).append(lowerHex);
+    }
+    return sb.toString();
+  }
+
+  public static @Nullable ByteBuffer tryParse(CharSequence hex, int byteCount) {
+    if (hex.length() < 2 * byteCount) {
+      return null;
+    }
+
+    var buffer = ByteBuffer.allocate(byteCount);
+    for (int i = 0; i < byteCount; i++) {
+      int upperNibble = Character.digit(hex.charAt(2 * i), 16);
+      int lowerNibble = Character.digit(hex.charAt(2 * i + 1), 16);
+      if (upperNibble == -1 || lowerNibble == -1) {
+        return null; // Encountered a non-hex character
+      }
+      buffer.put((byte) ((upperNibble << 4) | lowerNibble));
+    }
+    return buffer.flip();
   }
 }

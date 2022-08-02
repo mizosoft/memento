@@ -20,15 +20,23 @@
  * SOFTWARE.
  */
 
-package com.github.mizonas.memento;
+package com.github.mizosoft.memento.function;
 
-import static com.github.mizonas.memento.internal.Validate.TODO;
+import java.util.concurrent.CompletionException;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
+/** A {@code Runnable} that may throw a checked exception. */
+@FunctionalInterface
+public interface ThrowingRunnable {
+  void run() throws Exception;
 
-public interface Seekable {
-  long position() throws IOException;
-
-  Seekable position(long position) throws IOException;
+  default Runnable toUnchecked() {
+    return () -> {
+      try {
+        run();
+      } catch (Exception e) {
+        Unchecked.propagateIfUnchecked(e);
+        throw new CompletionException(e);
+      }
+    };
+  }
 }

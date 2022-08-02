@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 
-package com.github.mizonas.memento.function;
+package com.github.mizosoft.memento.function;
 
 import java.util.concurrent.CompletionException;
 import java.util.function.Function;

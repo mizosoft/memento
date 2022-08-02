@@ -1,3 +1,4 @@
 rootProject.name = 'memento-parent'
 
 include 'memento'
+include 'memento-testing'

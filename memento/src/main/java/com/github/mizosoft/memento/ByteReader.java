@@ -20,11 +20,20 @@
  * SOFTWARE.
  */
 
-package com.github.mizonas.memento.internal.hash;
+package com.github.mizosoft.memento;
 
-import java.nio.ByteBuffer;
+import java.io.InputStream;
+import java.io.Reader;
+import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
+import java.nio.charset.Charset;
 
-@FunctionalInterface
-public interface Hasher {
-  byte[] hash(ByteBuffer key);
+public interface ByteReader extends ReadableByteChannel, Seekable {
+  default InputStream toInputStream() {
+    return Channels.newInputStream(this);
+  }
+
+  default Reader toCharReader(Charset charset) {
+    return Channels.newReader(this, charset);
+  }
 }

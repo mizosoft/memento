@@ -20,20 +20,27 @@
  * SOFTWARE.
  */
 
-package com.github.mizonas.memento;
+package com.github.mizosoft.memento;
 
-import java.io.OutputStream;
-import java.io.Writer;
-import java.nio.channels.Channels;
-import java.nio.channels.WritableByteChannel;
-import java.nio.charset.Charset;
+import java.io.IOException;
+import java.nio.ByteBuffer;
 
-public interface ByteWriter extends WritableByteChannel, Seekable{
-  default OutputStream toOutputStream() {
-    return Channels.newOutputStream(this);
-  }
+public interface EntryWriter extends ByteWriter {
+  /**
+   * Sets the metadata block which is to be applied when the editor is closed.
+   *
+   * @throws IllegalStateException if the edit is committed
+   */
+  EntryWriter metadata(ByteBuffer metadata);
 
-  default Writer toCharWriter(Charset charset) {
-    return Channels.newWriter(this, charset);
-  }
+  long position() throws IOException;
+
+  EntryWriter position(long position) throws IOException;
+
+  @Override
+  int write(ByteBuffer src) throws IOException;
+
+  int write(long position, ByteBuffer src) throws IOException;
+
+  EntryWriter truncate(long size) throws IOException;
 }

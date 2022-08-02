@@ -20,23 +20,11 @@
  * SOFTWARE.
  */
 
-package com.github.mizonas.memento.function;
+package com.github.mizosoft.memento.internal.hash;
 
-import java.util.concurrent.CompletionException;
+import java.nio.ByteBuffer;
 
-/** A {@code Runnable} that may throw a checked exception. */
 @FunctionalInterface
-public interface ThrowingRunnable {
-  void run() throws Exception;
-
-  default Runnable toUnchecked() {
-    return () -> {
-      try {
-        run();
-      } catch (Exception e) {
-        Unchecked.propagateIfUnchecked(e);
-        throw new CompletionException(e);
-      }
-    };
-  }
+public interface Hasher {
+  byte[] hash(ByteBuffer key);
 }

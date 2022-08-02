@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Moataz Abdelnasser
+ * Copyright (c) 2022 Moataz Abdelnasser
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,16 +20,16 @@
  * SOFTWARE.
  */
 
-package com.github.mizonas.memento.internal.store;
+package com.github.mizosoft.memento.internal.store;
 
 
-import static com.github.mizonas.memento.internal.CompareUtils.max;
-import static com.github.mizonas.memento.internal.IOUtils.closeQuietly;
-import static com.github.mizonas.memento.internal.Validate.TODO;
-import static com.github.mizonas.memento.internal.Validate.castNonNull;
-import static com.github.mizonas.memento.internal.Validate.requireArgument;
-import static com.github.mizonas.memento.internal.Validate.requireNonNegativeDuration;
-import static com.github.mizonas.memento.internal.Validate.requireState;
+import static com.github.mizosoft.memento.internal.CompareUtils.max;
+import static com.github.mizosoft.memento.internal.IOUtils.closeQuietly;
+import static com.github.mizosoft.memento.internal.Validate.TODO;
+import static com.github.mizosoft.memento.internal.Validate.castNonNull;
+import static com.github.mizosoft.memento.internal.Validate.requireArgument;
+import static com.github.mizosoft.memento.internal.Validate.requireNonNegativeDuration;
+import static com.github.mizosoft.memento.internal.Validate.requireState;
 import static java.lang.String.format;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.nio.file.StandardCopyOption.ATOMIC_MOVE;
@@ -41,20 +41,20 @@ import static java.util.Objects.requireNonNull;
 import static java.util.Objects.requireNonNullElse;
 import static java.util.Objects.requireNonNullElseGet;
 
-import com.github.mizonas.memento.Delayer;
-import com.github.mizonas.memento.EntryReader;
-import com.github.mizonas.memento.EntryWriter;
-import com.github.mizonas.memento.Store;
-import com.github.mizonas.memento.StoreCorruptionException;
-import com.github.mizonas.memento.function.ThrowingBiConsumer;
-import com.github.mizonas.memento.function.ThrowingConsumer;
-import com.github.mizonas.memento.function.ThrowingRunnable;
-import com.github.mizonas.memento.function.Unchecked;
-import com.github.mizonas.memento.internal.DebugUtils;
-import com.github.mizonas.memento.internal.IOUtils;
-import com.github.mizonas.memento.internal.hash.Hasher;
-import com.github.mizonas.memento.internal.hash.Hex;
-import java.io.BufferedReader;
+import com.github.mizosoft.memento.Delayer;
+import com.github.mizosoft.memento.EntryReader;
+import com.github.mizosoft.memento.EntryWriter;
+import com.github.mizosoft.memento.Store;
+import com.github.mizosoft.memento.StoreCorruptionException;
+import com.github.mizosoft.memento.function.ThrowingBiConsumer;
+import com.github.mizosoft.memento.function.ThrowingConsumer;
+import com.github.mizosoft.memento.function.ThrowingRunnable;
+import com.github.mizosoft.memento.function.Unchecked;
+import com.github.mizosoft.memento.internal.DebugUtils;
+import com.github.mizosoft.memento.internal.IOUtils;
+import com.github.mizosoft.memento.internal.hash.Hasher;
+import com.github.mizosoft.memento.internal.hash.Hex;
+import com.github.mizosoft.memento.internal.hash.Sha256Hasher;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InterruptedIOException;
@@ -68,15 +68,12 @@ import java.nio.channels.ClosedChannelException;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.nio.channels.OverlappingFileLockException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.AccessDeniedException;
 import java.nio.file.DirectoryIteratorException;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
@@ -95,8 +92,6 @@ import java.util.TreeMap;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.Phaser;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeoutException;
@@ -122,7 +117,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * hashtable called the index. As changes are made to the store by adding, accessing or removing
  * entries, the index is transparently updated in a time-limited manner. By default, there's at most
  * one index update every 4 seconds. This rate can be changed by setting the system property: {@code
- * com.github.mizonas.methanol.internal.cache.DiskStore.indexUpdateDelayMillis}. Setting a small
+ * com.github.mizosoft.methanol.internal.cache.DiskStore.indexUpdateDelayMillis}. Setting a small
  * delay can result in too often index updates, which extracts a noticeable toll on IO and CPU,
  * especially if there's a relatively large number of entries (updating entails reconstructing then
  * rewriting the whole index). On the other hand, scarcely updating the index affords less
@@ -154,7 +149,7 @@ public final class DiskStore implements Store {
    *                    8-bytes-entry-count
    *                    8-bytes-reserved
    *   <entry-descriptor> = 10-bytes-entry-hash
-   *                        8-bytes-last-used-millis (maintained for LRU eviction)
+   *                        8-bytes-last-used (maintained for LRU eviction)
    *                        8-bytes-entry-size
    *
    *   <entry> = <data> <entry-epilogue>
@@ -164,7 +159,8 @@ public final class DiskStore implements Store {
    *   <metadata> = byte*
    *   <entry-trailer> = 8-bytes-entry-magic
    *                     4-bytes-store-version
-   *                     2-bytes-key-size (unsigned)
+   *                     4-bytes-app-version
+   *                     4-bytes-key-size (unsigned)
    *                     4-bytes-metadata-size
    *                     8-bytes-data-size
    *                     8-bytes-reserved
@@ -193,7 +189,7 @@ public final class DiskStore implements Store {
   static final int STORE_VERSION = 1;
   static final int INDEX_HEADER_SIZE = 3 * Long.BYTES + 2 * Integer.BYTES;
   static final int ENTRY_DESCRIPTOR_SIZE = Hash.BYTES + 2 * Long.BYTES;
-  static final int ENTRY_TRAILER_SIZE = 3 * Long.BYTES + 3 * Integer.BYTES + Short.BYTES;
+  static final int ENTRY_TRAILER_SIZE = 3 * Long.BYTES + 4 * Integer.BYTES;
 
   static final String LOCK_FILENAME = ".lock";
   static final String INDEX_FILENAME = "index";
@@ -933,6 +929,7 @@ public final class DiskStore implements Store {
         if (entryCount == 0) {
           return Set.of();
         }
+        
         int intEntryCount = (int) entryCount;
         int entryTableSize = intEntryCount * ENTRY_DESCRIPTOR_SIZE;
         var entryTable = StoreIO.readNBytes(channel, entryTableSize);
@@ -1429,52 +1426,6 @@ public final class DiskStore implements Store {
     }
   }
 
-  private static final class Sha256Hasher implements Hasher {
-    private static final MessageDigest SHA_256_DIGEST_TEMPLATE = lookupSha256Digest();
-    private static final boolean CLONE_SUPPORTED;
-    static {
-      boolean cloneSupported;
-      try {
-        SHA_256_DIGEST_TEMPLATE.clone();
-        cloneSupported = true;
-      } catch (CloneNotSupportedException ignored) {
-        cloneSupported = false;
-      }
-
-      CLONE_SUPPORTED = cloneSupported;
-    }
-
-    Sha256Hasher() {}
-
-    @Override
-    public byte[] hash(ByteBuffer key) {
-      var digest = newDigest();
-      digest.update(key);
-      return digest.digest();
-    }
-
-    private static MessageDigest newDigest() {
-      if (CLONE_SUPPORTED) {
-        try {
-          var digest = (MessageDigest) SHA_256_DIGEST_TEMPLATE.clone();
-          digest.reset();
-          return digest;
-        } catch (CloneNotSupportedException ignored) {
-          // Fallback to look-up
-        }
-      }
-      return lookupSha256Digest();
-    }
-
-    private static MessageDigest lookupSha256Digest() {
-      try {
-        return MessageDigest.getInstance("SHA-256");
-      } catch (NoSuchAlgorithmException e) {
-        throw new UnsupportedOperationException("SHA-256 not available!", e);
-      }
-    }
-  }
-
   private record EntryDescriptor(Hash hash, Instant lastUsed, long size) {
     /**
      * A comparator with LRU eviction order, preferring to evict smaller entries over larger ones
@@ -1826,6 +1777,7 @@ public final class DiskStore implements Store {
           .putInt(keySize)
           .putInt(metadataSize)
           .putLong(dataSize)
+          .putLong(0) // Reserved 8 bytes
           .flip();
     }
 
@@ -1844,6 +1796,7 @@ public final class DiskStore implements Store {
     }
 
     private EntryReadResult readEntry(FileChannel channel) throws IOException {
+      // TODO read trailer along with key & metadata optimistically (read an arbitrarily larger size)
       var trailer =
           StoreIO.readNBytes(
               channel, ENTRY_TRAILER_SIZE, /* position */ channel.size() - ENTRY_TRAILER_SIZE);
@@ -1959,7 +1912,7 @@ public final class DiskStore implements Store {
 
     @Override
     public EntryReader reader() {
-      return null;
+      return reader;
     }
 
     @Override
@@ -2198,7 +2151,7 @@ public final class DiskStore implements Store {
         lock.lock();
         try {
           requireNotClosed();
-          this.metadata = IOUtils.copyIfWritable(metadata);
+          this.metadata = IOUtils.copy(metadata).asReadOnlyBuffer();
           editedMetadata = true;
         } finally {
           lock.unlock();
@@ -2342,18 +2295,18 @@ public final class DiskStore implements Store {
     }
   }
 
-  public static void main(String[] args) throws Exception {
-    try (var store = newBuilder().directory(Path.of("test"))
-        .maxSize(10000).executor(ForkJoinPool.commonPool()).appVersion(1).build()) {
-      try (var editor = store.tryEdit("a7a").orElseThrow()) {
-        editor.writer().metadata(ByteBuffer.wrap(new byte[] {1, 2, 3}));
-        editor.writer().write(UTF_8.encode("Morning lads!"));
-        editor.commitOnClose();
-      }
-      try (var viewer = store.viewIfPresent("a7a").orElseThrow()) {
-        System.out.println(viewer.reader().metadata());
-        System.out.println(new BufferedReader(viewer.reader().toCharReader(UTF_8)).readLine());
-      }
-    }
-  }
+//  public static void main(String[] args) throws Exception {
+//    try (var store = newBuilder().directory(Path.of("test"))
+//        .maxSize(10000).executor(ForkJoinPool.commonPool()).appVersion(1).build()) {
+//      try (var editor = store.tryEdit("k").orElseThrow()) {
+//        editor.writer().metadata(ByteBuffer.wrap(new byte[] {1, 2, 3}));
+//        editor.writer().write(UTF_8.encode("Morning lads!"));
+//        editor.commitOnClose();
+//      }
+//      try (var viewer = store.viewIfPresent("k").orElseThrow()) {
+//        System.out.println(viewer.reader().metadata());
+//        System.out.println(new BufferedReader(viewer.reader().toCharReader(UTF_8)).readLine());
+//      }
+//    }
+//  }
 }

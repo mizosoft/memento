@@ -20,22 +20,17 @@
  * SOFTWARE.
  */
 
-package com.github.mizonas.memento.function;
+package com.github.mizosoft.memento.internal;
 
-import java.util.concurrent.CompletionException;
-import java.util.function.BiConsumer;
+public class DebugUtils {
+  private DebugUtils() {}
 
-public interface ThrowingBiConsumer<T, U> {
-  void apply(T t, U u) throws Exception;
-
-  default BiConsumer<T, U> toUnchecked() {
-    return (t, u) -> {
-      try {
-        apply(t, u);
-      } catch (Exception e) {
-        Unchecked.propagateIfUnchecked(e);
-        throw new CompletionException(e);
-      }
-    };
+  public static boolean isAssertionsEnabled() {
+    try {
+      assert false;
+      return false;
+    } catch (AssertionError ignored) {
+      return true;
+    }
   }
 }

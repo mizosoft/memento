@@ -20,24 +20,22 @@
  * SOFTWARE.
  */
 
-package com.github.mizonas.memento.function;
+package com.github.mizosoft.memento;
 
-import java.util.concurrent.CompletionException;
-import java.util.function.Supplier;
+import java.io.IOException;
+import java.nio.ByteBuffer;
 
-/** A {@code Supplier} that may throw a checked exception. */
-@FunctionalInterface
-public interface ThrowingSupplier<T> {
-  T get() throws Exception;
+public interface EntryReader extends ByteReader {
+  ByteBuffer metadata();
 
-  default Supplier<T> toUnchecked() {
-    return () -> {
-      try {
-        return get();
-      } catch (Exception e) {
-        Unchecked.propagateIfUnchecked(e);
-        throw new CompletionException(e);
-      }
-    };
-  }
+  long position() throws IOException;
+
+  EntryReader position(long position) throws IOException;
+
+  @Override
+  int read(ByteBuffer dst) throws IOException;
+
+  int read(ByteBuffer dst, long position) throws IOException;
+
+  boolean removeEntry() throws IOException;
 }

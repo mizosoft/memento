@@ -20,12 +20,10 @@
  * SOFTWARE.
  */
 
-package com.github.mizonas.memento;
+package com.github.mizosoft.memento;
 
-import static com.github.mizonas.memento.internal.Validate.TODO;
-
-import com.github.mizonas.memento.function.ThrowingBiConsumer;
-import com.github.mizonas.memento.function.ThrowingConsumer;
+import com.github.mizosoft.memento.function.ThrowingBiConsumer;
+import com.github.mizosoft.memento.function.ThrowingConsumer;
 import java.io.Closeable;
 import java.io.Flushable;
 import java.io.IOException;

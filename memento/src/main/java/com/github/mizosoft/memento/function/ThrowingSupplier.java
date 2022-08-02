@@ -20,18 +20,20 @@
  * SOFTWARE.
  */
 
-package com.github.mizonas.memento.function;
+package com.github.mizosoft.memento.function;
 
 import java.util.concurrent.CompletionException;
-import java.util.function.Consumer;
+import java.util.function.Supplier;
 
-public interface ThrowingConsumer<T> {
-  void accept(T val);
+/** A {@code Supplier} that may throw a checked exception. */
+@FunctionalInterface
+public interface ThrowingSupplier<T> {
+  T get() throws Exception;
 
-  default Consumer<T> toUnchecked() {
-    return val -> {
+  default Supplier<T> toUnchecked() {
+    return () -> {
       try {
-        accept(val);
+        return get();
       } catch (Exception e) {
         Unchecked.propagateIfUnchecked(e);
         throw new CompletionException(e);
