@@ -2294,19 +2294,4 @@ public final class DiskStore implements Store {
       return new DiskStore(this);
     }
   }
-
-//  public static void main(String[] args) throws Exception {
-//    try (var store = newBuilder().directory(Path.of("test"))
-//        .maxSize(10000).executor(ForkJoinPool.commonPool()).appVersion(1).build()) {
-//      try (var editor = store.tryEdit("k").orElseThrow()) {
-//        editor.writer().metadata(ByteBuffer.wrap(new byte[] {1, 2, 3}));
-//        editor.writer().write(UTF_8.encode("Morning lads!"));
-//        editor.commitOnClose();
-//      }
-//      try (var viewer = store.viewIfPresent("k").orElseThrow()) {
-//        System.out.println(viewer.reader().metadata());
-//        System.out.println(new BufferedReader(viewer.reader().toCharReader(UTF_8)).readLine());
-//      }
-//    }
-//  }
 }

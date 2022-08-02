@@ -13,7 +13,6 @@ junit-platform-commons = { module = 'org.junit.platform:junit-platform-commons' 
 reactivestreams-examples = { module = 'org.reactivestreams:reactive-streams-examples', version.ref = 'reactivestreams' }
 checkerframework = { module = 'org.checkerframework:checker', version.ref = 'checkerframework' }
 checkerframework-qual = { module = 'org.checkerframework:checker-qual', version.ref = 'checkerframework' }
-protobuf-compiler = { module = 'com.google.protobuf:protoc', version.ref = 'protobuf' }
 errorprone = { module = 'com.google.errorprone:error_prone_core', version.ref = 'errorprone' }
 errorprone-annotations = { module = 'com.google.errorprone:error_prone_annotations', version.ref = 'errorprone' }
 junit-params = { module = 'org.junit.jupiter:junit-jupiter-params' }

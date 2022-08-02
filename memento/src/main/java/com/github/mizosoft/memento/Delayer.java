@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 
-package com.github.mizonas.memento;
+package com.github.mizosoft.memento;
 
 import static java.util.Objects.requireNonNull;
 
