@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, 2020 Moataz Abdelnasser
+ * Copyright (c) 2022 Moataz Abdelnasser
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -49,7 +49,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
-import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Lock;
@@ -694,7 +693,7 @@ public final class MemoryStore implements Store {
     }
   }
 
-    public static void main(String[] args) throws Exception {
+  public static void main(String[] args) throws Exception {
     try (var store = new MemoryStore(1000)) {
       try (var editor = store.tryEdit("k").orElseThrow()) {
         editor.writer().metadata(UTF_8.encode("bababooey"));
