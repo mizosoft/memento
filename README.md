@@ -1,16 +1,16 @@
 # Memento
 
-A high-concurrency key-value store with background LRU eviction based on a size bound.
+A high-concurrency key-value store with background LRU eviction.
 The store is inspired by [Chromium's Simple Backend](https://www.chromium.org/developers/design-documents/network-stack/disk-cache/very-simple-backend/).
 
 Each entry tracked by the store is mapped by a string key, and comprises a metadata block and a data stream. The entry's metadata block
 & data stream can be accessed by a `Viewer` and modified by an `Editor`. An entry can have at most one
-active `Editor` but can have multiple concurrent `Viewers` after it has been first successfully edited.
+active `Editor`, but can have multiple concurrent `Viewers` after it has been first successfully edited.
 
 ## Download 
 
 Memento is not yet available on maven. You can try out it by cloning this repo, but note that the
-API is subject to change.
+API is subject to change, and there are some API stubs.
 
 The library is currently compatible with Java 17+.
 
@@ -42,7 +42,7 @@ try (var store = Memento.onDisk(Path.of("test-dir"), 8 * 1024)) {
 
 ## Origins
 
-This project originally sprung up from within [Methanol's](https://github.com/mizosoft/methanol) HTTP cache implementation. I originally wanted
+This project originally grew from within [Methanol's](https://github.com/mizosoft/methanol) HTTP cache implementation. I originally wanted
 to write a good default storage backend for the HTTP cache without relying on third-party dependencies (maintaining Methanol's zero dependency policy, if you want to call it such),
 with possibility of expansion to other storage backends (e.g. redis) under the same [API](/memento/src/main/java/com/github/mizosoft/memento/Store.java).
 
