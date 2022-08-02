@@ -1,5 +1,15 @@
 subprojects {
+  apply plugin: 'java-library'
+
+  sourceCompatibility = JavaVersion.VERSION_17
+
   repositories {
     mavenCentral()
+  }
+
+  dependencies {
+    //  implementation 'com.google.errorprone:error_prone_core:2.11.0'
+    implementation 'com.google.errorprone:error_prone_annotations:2.14.0'
+    compileOnly 'org.checkerframework:checker-qual:3.22.1'
   }
 }

@@ -50,7 +50,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * uses for indexing purposes. Thus, a store's {@code maxSize()} is not exact and might be slightly
  * exceeded as necessary.
  *
- * <p>{@code Store} is thread-safe and is suitable for concurrent use.
+ * <p>{@code Store} is thread-safe and is suitable for concurrent usage.
  */
 public interface Store extends AutoCloseable, Flushable {
 
