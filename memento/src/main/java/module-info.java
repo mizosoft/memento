@@ -3,4 +3,5 @@ open module com.github.mizonas.memento {
   requires static com.google.errorprone.annotations;
 
   exports com.github.mizosoft.memento;
+  exports com.github.mizosoft.memento.function;
 }
